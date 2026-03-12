@@ -64,6 +64,10 @@ export interface Grade {
   feedback: string | null;
   criteria_scores: CriterionScore[];
   ai_model: string | null;
+  reviewed: boolean;
+  teacher_notes: string | null;
+  original_score: number | null;
+  original_letter_grade: string | null;
   graded_at: string;
   created_at: string;
   updated_at: string;
