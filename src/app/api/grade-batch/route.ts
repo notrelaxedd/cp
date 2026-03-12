@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildGradingPrompt } from "@/lib/grading-prompt";
-import Anthropic from "@anthropic-ai/sdk";
+import { checkFeature, getRemainingPapers } from "@/lib/usage";
+import { generateText } from "@/lib/gemini";
 import type { CriterionDef, CriterionScore } from "@/types";
 
 export const maxDuration = 300;
@@ -32,6 +33,21 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Check batch grading feature access
+    const featureCheck = await checkFeature(supabase, user.id, "batchGrading");
+    if (!featureCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: "Batch grading requires a Pro or School plan.",
+          code: "FEATURE_LOCKED",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Check remaining paper quota
+    const remaining = await getRemainingPapers(supabase, user.id);
 
     const { assignment_id } = await request.json();
     if (!assignment_id) {
@@ -85,11 +101,26 @@ export async function POST(request: Request) {
       );
     }
 
-    const anthropic = new Anthropic();
+    // Cap papers to remaining quota
+    const papersToGrade =
+      remaining === Infinity
+        ? papers
+        : papers.slice(0, remaining);
+
+    if (papersToGrade.length === 0) {
+      return NextResponse.json(
+        {
+          error: "You've reached your monthly paper grading limit. Upgrade your plan to grade more.",
+          code: "LIMIT_REACHED",
+        },
+        { status: 403 }
+      );
+    }
+
     const results: PaperResult[] = [];
 
     // Grade papers sequentially
-    for (const paper of papers) {
+    for (const paper of papersToGrade) {
       const result: PaperResult = {
         paper_id: paper.id,
         student_name: paper.student_name,
@@ -121,14 +152,7 @@ export async function POST(request: Request) {
           paperText: paper.extracted_text,
         });
 
-        const message = await anthropic.messages.create({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 2048,
-          messages: [{ role: "user", content: prompt }],
-        });
-
-        const responseText =
-          message.content[0].type === "text" ? message.content[0].text : "";
+        const responseText = await generateText(prompt);
 
         let gradeData: GradeResponse;
         try {
@@ -168,7 +192,7 @@ export async function POST(request: Request) {
             letter_grade: gradeData.letter_grade,
             feedback: gradeData.feedback,
             criteria_scores: gradeData.criteria_scores,
-            ai_model: "claude-sonnet-4-20250514",
+            ai_model: "gemini-2.5-flash",
           })
           .select()
           .single();

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildGradingPrompt } from "@/lib/grading-prompt";
-import Anthropic from "@anthropic-ai/sdk";
+import { checkPaperLimit } from "@/lib/usage";
+import { generateText } from "@/lib/gemini";
 import type { CriterionDef, CriterionScore } from "@/types";
 
 export const maxDuration = 120;
@@ -46,6 +47,15 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check plan limits
+    const usage = await checkPaperLimit(supabase, user.id);
+    if (!usage.allowed) {
+      return NextResponse.json(
+        { error: usage.message, code: "LIMIT_REACHED" },
+        { status: 403 }
+      );
     }
 
     const { paper_id } = await request.json();
@@ -115,15 +125,7 @@ export async function POST(request: Request) {
       paperText: paper.extracted_text,
     });
 
-    const anthropic = new Anthropic();
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2048,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const responseText =
-      message.content[0].type === "text" ? message.content[0].text : "";
+    const responseText = await generateText(prompt);
 
     let gradeData: GradeResponse;
     try {
@@ -168,7 +170,7 @@ export async function POST(request: Request) {
         letter_grade: gradeData.letter_grade,
         feedback: gradeData.feedback,
         criteria_scores: gradeData.criteria_scores,
-        ai_model: "claude-sonnet-4-20250514",
+        ai_model: "gemini-2.5-flash",
       })
       .select()
       .single();
