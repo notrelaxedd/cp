@@ -16,7 +16,7 @@
     "mammoth": "^1.11.0",
     "next": "14.2.35",
     "papaparse": "^5.5.3",
-    "pdf-parse": "^2.4.5",
+    "pdf-parse": "^1.1.1",
     "react": "^18",
     "react-dom": "^18",
     "stripe": "^20.4.1"
