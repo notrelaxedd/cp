@@ -144,17 +144,61 @@ export default async function AssignmentDetailPage({
             )}
           </div>
         </div>
-        {avgScore !== null && (
-          <div className="text-right">
-            <p className="text-sm text-gray-500">Class Average</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {avgScore.toFixed(1)}
-              <span className="text-sm font-normal text-gray-400">
-                /{typedAssignment.rubrics?.max_score ?? 100}
-              </span>
-            </p>
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {avgScore !== null && (
+            <div className="mr-4 text-right">
+              <p className="text-sm text-gray-500">Class Average</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {avgScore.toFixed(1)}
+                <span className="text-sm font-normal text-gray-400">
+                  /{typedAssignment.rubrics?.max_score ?? 100}
+                </span>
+              </p>
+            </div>
+          )}
+          {graded > 0 && (
+            <div className="flex gap-2">
+              <a
+                href={`/api/export-csv?assignment_id=${params.id}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                CSV
+              </a>
+              <a
+                href={`/api/export-pdf?assignment_id=${params.id}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                PDF
+              </a>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Progress Bars */}
