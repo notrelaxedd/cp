@@ -112,7 +112,7 @@ export async function POST(request: Request) {
       .update({ status: "processing" })
       .eq("id", paper_id);
 
-    // Build prompt and call Claude
+    // Build prompt and call Gemini
     const prompt = buildGradingPrompt({
       rubricName: rubric.name,
       criteria: rubric.criteria as CriterionDef[],
