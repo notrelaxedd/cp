@@ -8,12 +8,17 @@ export interface PlanDef {
     papersPerMonth: number;
     assignmentsPerMonth: number;
     rubricsTotal: number;
+    maxBatchSize: number;
     exportCsv: boolean;
     exportPdf: boolean;
     batchGrading: boolean;
   };
   features: string[];
 }
+
+// TODO: Add stripePriceId to PlanDef and wire up Stripe checkout when
+// payments are re-enabled. Each paid plan will need a corresponding
+// Stripe Price ID from the dashboard.
 
 export const PLANS: Record<PlanId, PlanDef> = {
   free: {
@@ -23,18 +28,18 @@ export const PLANS: Record<PlanId, PlanDef> = {
     limits: {
       papersPerMonth: 15,
       assignmentsPerMonth: 3,
-      rubricsTotal: 5,
-      exportCsv: true,
-      exportPdf: true,
+      rubricsTotal: 3,
+      maxBatchSize: 3,
+      exportCsv: false,
+      exportPdf: false,
       batchGrading: true,
     },
     features: [
       "15 papers/month",
       "3 assignments/month",
-      "5 rubrics",
+      "3 rubrics",
       "AI grading",
-      "Batch grading (1-3 papers)",
-      "CSV & PDF export",
+      "Batch grading (up to 3 papers)",
     ],
   },
   pro: {
@@ -45,6 +50,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
       papersPerMonth: 200,
       assignmentsPerMonth: 20,
       rubricsTotal: 50,
+      maxBatchSize: 35,
       exportCsv: true,
       exportPdf: true,
       batchGrading: true,
@@ -53,7 +59,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
       "200 papers/month",
       "20 assignments/month",
       "50 rubrics",
-      "AI grading + batch mode",
+      "Batch grading (up to 35 papers)",
       "CSV & PDF export",
       "Teacher review tools",
     ],
@@ -66,6 +72,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
       papersPerMonth: -1, // unlimited
       assignmentsPerMonth: -1,
       rubricsTotal: -1,
+      maxBatchSize: 150,
       exportCsv: true,
       exportPdf: true,
       batchGrading: true,
@@ -74,7 +81,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
       "Unlimited papers",
       "Unlimited assignments",
       "Unlimited rubrics",
-      "AI grading + batch mode",
+      "Batch grading (up to 150 papers)",
       "CSV & PDF export",
       "Teacher review tools",
       "Priority support",

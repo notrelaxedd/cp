@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildGradingPrompt } from "@/lib/grading-prompt";
-import { checkFeature, getRemainingPapers } from "@/lib/usage";
+import { checkFeature, getRemainingPapers, getMaxBatchSize } from "@/lib/usage";
 import { generateText } from "@/lib/gemini";
 import type { CriterionDef, CriterionScore } from "@/types";
 
@@ -101,11 +101,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Cap papers to remaining quota
+    // Cap papers to batch size limit and remaining quota
+    const maxBatch = getMaxBatchSize();
+    const cappedByBatch = papers.slice(0, maxBatch);
     const papersToGrade =
       remaining === Infinity
-        ? papers
-        : papers.slice(0, remaining);
+        ? cappedByBatch
+        : cappedByBatch.slice(0, remaining);
 
     if (papersToGrade.length === 0) {
       return NextResponse.json(

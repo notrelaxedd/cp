@@ -12,14 +12,9 @@ export default function SettingsPage() {
         Manage your subscription and plan
       </p>
 
-      {/* Coming Soon Banner */}
-      <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 px-6 py-4 text-center">
-        <p className="text-sm font-medium text-blue-800">
-          Paid plans are coming soon. All features are currently free to use!
-        </p>
-      </div>
-
       {/* Plan Cards */}
+      {/* TODO: Once Stripe is re-enabled, restore checkout buttons and
+          manage-billing portal link for paid plan subscribers. */}
       <div className="mt-8 grid gap-6 sm:grid-cols-3">
         {planOrder.map((planId) => {
           const plan = PLANS[planId];
@@ -34,9 +29,9 @@ export default function SettingsPage() {
                   : "border-gray-200 bg-white"
               }`}
             >
-              {planId === "pro" && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-0.5 text-xs font-medium text-white">
-                  Popular
+              {!isFree && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-3 py-0.5 text-xs font-medium text-white">
+                  Coming Soon
                 </span>
               )}
               <h4 className="text-lg font-semibold text-gray-900">

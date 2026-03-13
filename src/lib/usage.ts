@@ -66,6 +66,14 @@ export async function getRemainingPapers(
 }
 
 /**
+ * Get the maximum batch size for the user's plan.
+ */
+export function getMaxBatchSize(): number {
+  // TODO: Look up user's actual plan once Stripe is re-integrated.
+  return FREE_PLAN.limits.maxBatchSize;
+}
+
+/**
  * Check if user can create more assignments this month
  */
 export async function checkAssignmentLimit(
@@ -97,7 +105,6 @@ export async function checkAssignmentLimit(
 
 /**
  * Check if a feature is available on the user's plan.
- * All features are unlocked for now — gate behind Stripe later.
  */
 export async function checkFeature(
   _supabase: SupabaseClient,
