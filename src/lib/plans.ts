@@ -4,7 +4,6 @@ export interface PlanDef {
   id: PlanId;
   name: string;
   price: number; // monthly in dollars, 0 = free
-  stripePriceId: string | null;
   limits: {
     papersPerMonth: number;
     assignmentsPerMonth: number;
@@ -21,28 +20,27 @@ export const PLANS: Record<PlanId, PlanDef> = {
     id: "free",
     name: "Free",
     price: 0,
-    stripePriceId: null,
     limits: {
-      papersPerMonth: 20,
+      papersPerMonth: 15,
       assignmentsPerMonth: 3,
       rubricsTotal: 5,
-      exportCsv: false,
-      exportPdf: false,
-      batchGrading: false,
+      exportCsv: true,
+      exportPdf: true,
+      batchGrading: true,
     },
     features: [
-      "20 papers/month",
+      "15 papers/month",
       "3 assignments/month",
       "5 rubrics",
       "AI grading",
-      "Basic feedback",
+      "Batch grading (1-3 papers)",
+      "CSV & PDF export",
     ],
   },
   pro: {
     id: "pro",
     name: "Pro",
     price: 9,
-    stripePriceId: process.env.STRIPE_PRO_PRICE_ID ?? "",
     limits: {
       papersPerMonth: 200,
       assignmentsPerMonth: 20,
@@ -64,7 +62,6 @@ export const PLANS: Record<PlanId, PlanDef> = {
     id: "school",
     name: "School",
     price: 29,
-    stripePriceId: process.env.STRIPE_SCHOOL_PRICE_ID ?? "",
     limits: {
       papersPerMonth: -1, // unlimited
       assignmentsPerMonth: -1,
